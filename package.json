@@ -83,39 +83,7 @@
 	},
 	"type": "module",
 	"license": "MIT",
-	"main": "./index.js",
-	"types": "./index.d.ts",
-	"svelte": "./index.js",
-	"typesVersions": {
-		"*": {
-			"types": [
-				"./types/index.d.ts"
-			],
-			"utils": [
-				"./utils/index.d.ts"
-			],
-			"assets": [
-				"./assets/index.d.ts"
-			]
-		}
-	},
-	"exports": {
-		".": {
-			"types": "./index.d.ts",
-			"svelte": "./index.js"
-		},
-		"./types": {
-			"types": "./types/index.d.ts",
-			"default": "./types/index.d.ts"
-		},
-		"./utils": {
-			"types": "./utils/index.d.ts",
-			"default": "./utils/index.js"
-		},
-		"./assets": {
-			"types": "./assets/index.d.ts",
-			"default": "./assets/index.js"
-		},
-		"./styles/flags.css": "./styles/flags.css"
-	}
+	"main": "index.js",
+	"types": "index.d.ts",
+	"svelte": "index.js"
 }
