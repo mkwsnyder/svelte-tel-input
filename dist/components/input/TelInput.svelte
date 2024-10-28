@@ -1,10 +1,11 @@
-<script>import { createEventDispatcher, onMount } from "svelte";
+<script>import { createEventDispatcher, onMount, tick } from "svelte";
 import { parsePhoneNumberWithError, ParseError } from "libphonenumber-js/max";
 import {
   normalizeTelInput,
   getCountryForPartialE164Number,
   generatePlaceholder,
-  telInputAction
+  telInputAction,
+  allowedCharacters
 } from "../../utils/index.js";
 const dispatch = createEventDispatcher();
 const defaultOptions = {
@@ -47,7 +48,20 @@ const updateCountry = (countryCode) => {
   }
   return country;
 };
-const handleParsePhoneNumber = (rawInput, currCountry = null) => {
+const findNewCursorPosition = (newValue, formattedValue, initialCursorPosition) => {
+  let fvIndex = 0;
+  for (let nvIndex = 0; nvIndex < initialCursorPosition; nvIndex++) {
+    const nvChar = allowedCharacters(newValue[nvIndex], { spaces: false });
+    if (nvChar >= "0" && nvChar <= "9") {
+      while (!(formattedValue[fvIndex] >= "0" && formattedValue[fvIndex] <= "9") && fvIndex < formattedValue.length) {
+        fvIndex++;
+      }
+      fvIndex++;
+    }
+  }
+  return fvIndex;
+};
+const handleParsePhoneNumber = async (rawInput, currCountry = null) => {
   const input = rawInput;
   if (input !== null) {
     const numberHasCountry = getCountryForPartialE164Number(input);
@@ -71,10 +85,23 @@ const handleParsePhoneNumber = (rawInput, currCountry = null) => {
     }
     const formatOption = combinedOptions.format === "national" ? "nationalNumber" : "e164";
     const formattedValue = combinedOptions.format === "national" ? "formatOriginal" : "formatInternational";
+    const initialCursorPosition = el?.selectionStart || 0;
     if (combinedOptions.spaces && detailedValue?.[formattedValue]) {
       inputValue = detailedValue[formattedValue] ?? null;
+      await tick();
+      if (el) {
+        const newCursorPosition = findNewCursorPosition(input, inputValue, initialCursorPosition);
+        el.selectionStart = newCursorPosition;
+        el.selectionEnd = newCursorPosition;
+      }
     } else if (detailedValue?.[formatOption]) {
       inputValue = detailedValue[formatOption] ?? null;
+      await tick();
+      if (el) {
+        const newCursorPosition = findNewCursorPosition(input, inputValue, initialCursorPosition);
+        el.selectionStart = newCursorPosition;
+        el.selectionEnd = newCursorPosition;
+      }
     }
     value = detailedValue?.e164 ?? input ?? null;
     valid = detailedValue?.isValid ?? false;
